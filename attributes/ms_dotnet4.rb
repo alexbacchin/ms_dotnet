@@ -19,13 +19,64 @@
 #
 
 if platform? 'windows'
-  nt_version = node['platform_version'].to_f
-  default['ms_dotnet']['v4']['version']                                   = '4.0'
-  if nt_version >= 5.1 && nt_version <= 6.1
-    default['ms_dotnet']['versions']['4.0']['package']['name']            = 'Microsoft .NET Framework 4 Extended'
-    default['ms_dotnet']['versions']['4.0']['package']['url']             = 'http://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe'
-    default['ms_dotnet']['versions']['4.0']['package']['checksum']        = '65e064258f2e418816b304f646ff9e87af101e4c9552ab064bb74d281c38659f'
+  all_packages = {
+    '4.0' => {
+      name:     'Microsoft .NET Framework 4 Extended',
+      url:      'http://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe',
+      checksum: '65e064258f2e418816b304f646ff9e87af101e4c9552ab064bb74d281c38659f'
+    },
+    '4.5' => {
+      name:     'Microsoft .NET Framework 4.5',
+      url:      'http://download.microsoft.com/download/B/A/4/BA4A7E71-2906-4B2D-A0E1-80CF16844F5F/dotNetFx45_Full_x86_x64.exe',
+      checksum: 'a04d40e217b97326d46117d961ec4eda455e087b90637cb33dd6cc4a2c228d83'
+    },
+    '4.5.1' => {
+      name:     'Microsoft .NET Framework 4.5.1',
+      url:      'http://download.microsoft.com/download/1/6/7/167F0D79-9317-48AE-AEDB-17120579F8E2/NDP451-KB2858728-x86-x64-AllOS-ENU.exe',
+      checksum: '5ded8628ce233a5afa8e0efc19ad34690f05e9bb492f2ed0413508546af890fe'
+    },
+    '4.5.2' => {
+      name:      'Microsoft .NET Framework 4.5.2',
+      url:       'http://download.microsoft.com/download/E/2/1/E21644B5-2DF2-47C2-91BD-63C560427900/NDP452-KB2901907-x86-x64-AllOS-ENU.exe',
+      checksum:  '6c2c589132e830a185c5f40f82042bee3022e721a216680bd9b3995ba86f3781'
+    }
+  }
 
+  all_patches = {}
+  if node['kernel']['machine'] == 'x86_64'
+    all_patches['KB2468871'] = {
+      name: 'Update for Microsoft .NET Framework 4 Extended (KB2468871)',
+      url: 'http://download.microsoft.com/download/2/B/F/2BF4D7D1-E781-4EE0-9E4F-FDD44A2F8934/NDP40-KB2468871-v2-x64.exe',
+      checksum: 'b1b53c3953377b111fe394dd57592d342cfc8a3261a5575253b211c1c2e48ff8'
+    }
+  else
+    all_patches['KB2468871'] = {
+      name: 'Update for Microsoft .NET Framework 4 Extended (KB2468871)',
+      url: 'http://download.microsoft.com/download/2/B/F/2BF4D7D1-E781-4EE0-9E4F-FDD44A2F8934/NDP40-KB2468871-v2-x86.exe',
+      checksum: '8822672fc864544e0766c80b635973bd9459d719b1af75f51483ff36cfb26f03'
+    }
+  end
+
+
+  nt_version = node['platform_version'].to_f
+  default['ms_dotnet']['v4']['version'] = '4.0'
+
+  available_packages = []
+  available_patches = []
+
+  case node['platform_version'].to_f
+  when 5.1, 5.2 # Windows XP & Windows Server 2003
+    available_packages = ['4.0']
+    available_patches = ['4.0.3']
+  when 6.0, 6.1
+    available_packages = ['4.0', '4.5']
+  when 6.1
+    available_packages = ['4.0', '4.5', '4.5.1', '4.5.2']
+  when 6.2
+  when 6.3
+  end
+  if nt_version >= 5.1 && nt_version <= 6.1
+    4.0
     # There is a patch for .NET4
     default['ms_dotnet']['versions']['4.0']['patch']['name']              = 'Update for Microsoft .NET Framework 4 Extended (KB2468871)'
     if node['kernel']['machine'] == 'x86_64'
@@ -39,20 +90,14 @@ if platform? 'windows'
 
   if nt_version >= 6.0
     if nt_version < 6.2
-      default['ms_dotnet']['versions']['4.5']['package']['name']          = 'Microsoft .NET Framework 4.5'
-      default['ms_dotnet']['versions']['4.5']['package']['url']           = 'http://download.microsoft.com/download/B/A/4/BA4A7E71-2906-4B2D-A0E1-80CF16844F5F/dotNetFx45_Full_x86_x64.exe'
-      default['ms_dotnet']['versions']['4.5']['package']['checksum']      = 'a04d40e217b97326d46117d961ec4eda455e087b90637cb33dd6cc4a2c228d83'
+      4.5
     end
 
     if nt_version < 6.3
-      default['ms_dotnet']['versions']['4.5.1']['package']['name']        = 'Microsoft .NET Framework 4.5.1'
-      default['ms_dotnet']['versions']['4.5.1']['package']['url']         = 'http://download.microsoft.com/download/1/6/7/167F0D79-9317-48AE-AEDB-17120579F8E2/NDP451-KB2858728-x86-x64-AllOS-ENU.exe'
-      default['ms_dotnet']['versions']['4.5.1']['package']['checksum']    = '5ded8628ce233a5afa8e0efc19ad34690f05e9bb492f2ed0413508546af890fe'
+      4.5.1
     end
 
-    default['ms_dotnet']['versions']['4.5.2']['package']['name']          = 'Microsoft .NET Framework 4.5.2'
-    default['ms_dotnet']['versions']['4.5.2']['package']['url']           = 'http://download.microsoft.com/download/E/2/1/E21644B5-2DF2-47C2-91BD-63C560427900/NDP452-KB2901907-x86-x64-AllOS-ENU.exe'
-    default['ms_dotnet']['versions']['4.5.2']['package']['checksum']      = '6c2c589132e830a185c5f40f82042bee3022e721a216680bd9b3995ba86f3781'
+    4.5.2
 
     # Starting with windows 8 and Server 2012 old version of .NET Framework 4 are builtin or included as feature
     if nt_version >= 6.2

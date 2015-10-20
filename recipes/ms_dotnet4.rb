@@ -56,6 +56,7 @@ if platform? 'windows'
       success_codes   [0, 3010]
       timeout         node['ms_dotnet']['timeout']
       action          :install
+      not_if          patch_info['not_if'] if patch_info['not_if']
     end
   end
 else

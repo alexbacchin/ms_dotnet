@@ -1,0 +1,32 @@
+---
+
+platforms:
+- name: centos-6.5
+  driver_plugin: vagrant
+  driver_config:
+    require_chef_omnibus: true
+    box: opscode-centos-6.5
+    box_url: http://filer.criteo.prod/boxes/opscode-centos-6.5.box
+- name: windows-2012r2
+  provisioner:
+    name: chef_zero
+    sudo: false
+    root_path: c:/var/chef
+    chef_client_path: c:/opscode/chef/bin/chef-client
+    chef_omnibus_root: c:/opscode/chef/
+    ruby_bindir: c:/opscode/chef/embedded/bin
+  driver_plugin: vagrant_winrm
+  driver_config:
+    provision: true
+    custom_settings:
+      omnibus.chef_version: '11.16.4'
+      omnibus.install_url: 'http://filer.criteo.preprod/remote_files/chef-client-criteo/chef-client-11.16.4-1.windows.msi'
+    require_chef_omnibus: false
+    box: windows-2012r2-standard
+    box_url: http://filer.criteo.prod:8080/boxes/windows-2008r2-web-core-dotnet45.box
+
+suites:
+- name: default
+  run_list: [
+    'recipe[ms_dotnet::ms_dotnet3]',
+  ]
