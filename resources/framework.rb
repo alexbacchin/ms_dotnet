@@ -22,7 +22,6 @@ actions :install
 default_action :install
 provides :ms_dotnet_framework
 
-attribute :major_version,   required: true, kind_of: Fixnum
-attribute :version,         default: nil,   kind_of: String
-attribute :timeout,         default: 600,   kind_of: Fixnum
-attribute :include_patches, default: true,  kind_of: [TrueClass, FalseClass]
+attribute :version,         name_attribute: true, kind_of: String
+attribute :timeout,         default: 600,         kind_of: Fixnum
+attribute :include_patches, default: true,        kind_of: [TrueClass, FalseClass]

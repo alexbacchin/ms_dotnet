@@ -20,6 +20,7 @@
 module MSDotNet
   class VersionHelper
 
+    attr_reader :arch, :nt_version, :is_core, :is_server, :machine_type
 
     def initialize(node)
       @arch = node['kernel']['machine'] == 'x86_64' ? 'x64' : 'x86' 
@@ -36,8 +37,10 @@ module MSDotNet
       end
     end
 
-    def self.factory(node, version)
-      case version.to_i
+    def self.factory(node, major_version)
+      case major_version
+        when 2
+          V2Helper.new node
         when 4
           V4Helper.new node
         else
@@ -45,25 +48,31 @@ module MSDotNet
       end
     end
 
-    def packages
-      raise NotImplementedError
+    def features(version)
+      version_features.include?(version) ? all_features : []
     end
 
-    def patches
-      raise NotImplementedError
+    def package(version)
+       all_packages[version] if version_package.include? version
     end
 
-    def setup_modes
-      raise NotImplementedError
-    end
-
-    def feature_names
-      raise NotImplementedError
+    def patches(version)
+      version_patches.include?(version) ? all_patches[version] : []
     end
 
     protected
 
-    attr_reader :arch, :nt_version, :is_core, :is_server, :machine_type
+    def all_features
+      raise NotImplementedError
+    end
+
+    def all_packages
+      raise NotImplementedError
+    end
+
+    def all_patches
+      raise NotImplementedError
+    end
 
     def core?
       is_core

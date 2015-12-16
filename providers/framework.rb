@@ -30,56 +30,64 @@ def load_current_resource
 end
 
 action :install do
- if have_feature? || have_package?
-   # Handle features
-   if have_feature?
+  if features.empty? || package.nil?
+    Chef::Log.info "Unsupported .NET version: #{new_resource.version}"
+  else
+    # Handle features
     feature_source = node['ms_dotnet']["v#{new_resource.major_version}"]['source']
-     version_helper.feature_names.each do |feature|
-       windows_feature feature do
-         action        :install
-         source        feature_source unless feature_source.nil?
-       end
-     end
-   end
-   # Handle packages
-   if have_package?
-     package = version_helper.package[version]
-     windows_package package[:name] do # ~FC009
-       action          :install
-       installer_type  :custom
-       success_codes   [0, 3010]
-       options         '/q /norestart'
-       timeout         new_resource.timeout
-       # Package specific info
-       checksum        package['checksum']
-       source          node['ms_dotnet']['packages'][package['checksum']] || package['url']
-       not_if          package['not_if'] if package['not_if']
-     end
-   end
+    features.each do |feature|
+      windows_feature feature do
+        action        :install
+        source        feature_source unless feature_source.nil?
+      end
+    end
 
-   # Handle patches
-   if new_resource.include_patches
-    
-   end
- else
-  Chef::Log.info "Unsupported .NET version: #{new_resource.version}"
- end
+    # Handle packages
+    win_package package if package
+
+    # Handle patches
+    if new_resource.include_patches
+      patches.each do |patch|
+        win_package patch
+      end
+    end
+  end
 end
 
 private
 
+def win_package(package)
+  windows_package package[:name] do # ~FC009
+    action          :install
+    installer_type  :custom
+    success_codes   [0, 3010]
+    options         '/q /norestart'
+    timeout         new_resource.timeout
+    # Package specific info
+    checksum        package[:checksum]
+    source          node['ms_dotnet']['packages'][package[:checksum]] || package[:url]
+    not_if          package[:not_if] unless package[:not_if].nil?
+  end
+end
+
+def major_version
+  @major_version ||= new_resource.version.to_i
+end
+
 def version_helper
-  @version_helper ||= ::MSDotNet::VersionHelper.factory node, new_resource.major_version
+  # Use same design as URI for the factory method
+  @version_helper ||= ::MSDotNet::VersionHelper.factory node, new_resource.version
 end
 
-def setup_modes
-  @setup_modes ||= version_helper.setup_modes
+def package
+  @package ||= version_helper.package new_resource.version
 end
 
-def have_feature?
-  @have_feature ||= setup_modes.feature && setup_modes.feature.include? new_resource.version
+def features
+  @features ||= version_helper.features new_resource.version
 end
 
-def have_package?
-  @have_package ||= setup_modes.package && setup_modes.package.include? new_resource.version
+def patches 
+  @patches ||= version_helper.patches new_resource.version
 end
+

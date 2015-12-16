@@ -18,9 +18,12 @@
 # limitations under the License.
 #
 module MSDotNet
-  class V4Helper
-    def packages
-      {
+  class V4Helper < VersionHelper
+
+# Catalog of packages, patches and feature
+
+    def all_packages
+      @all_packages ||= {
         '4.0' => {
           name:     'Microsoft .NET Framework 4 Extended',
           url:      'http://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe',
@@ -56,8 +59,8 @@ module MSDotNet
       end
     end
 
-    def patches
-      {
+    def all_patches
+      @all_patches ||= {
         'KB2468871' => {
           name:      'Update for Microsoft .NET Framework 4 Extended (KB2468871)',
           url:       "http://download.microsoft.com/download/2/B/F/2BF4D7D1-E781-4EE0-9E4F-FDD44A2F8934/NDP40-KB2468871-v2-#{arch}.exe",
@@ -72,25 +75,8 @@ module MSDotNet
       } 
     end
 
-    def setup_modes
-      case nt_version
-        when 5.1, 5.2 # Windows XP & Windows Server 2003
-          { package: ['4.0'] }
-        when 6.0, 6.1 # Vista, 7 & Windows Server 2008, 2008R2
-          { package: ['4.0', '4.5', '4.5.1', '4.5.2', '4.6'] }
-        when 6.2 # Windows 8 & Server 2012
-          { feature: ['4.0', '4.5'], package: ['4.5.1', '4.5.2', '4.6'] }
-        when 6.3 # Windows 8.1 & Server 2012R2
-          { feature: ['4.0', '4.5', '4.5.1'], package: ['4.5.2', '4.6'] }
-        when 10 # Windows 10
-          { feature: ['4.0', '4.5', '4.5.1', '4.5.2'], package: ['4.6'] }
-        else
-          {}
-      end
-    end
-
-    def feature_names
-      case nt_version
+    def all_features
+      @all_features ||= case nt_version
         when 6.2, 6.3, 10
           case machine_type
             # TODO check 2012R2 Core feature name
@@ -101,6 +87,49 @@ module MSDotNet
             else
               ['NetFx4']
           end
+      end
+    end
+
+# Mapping with .NET 4 versions
+
+    def version_features
+      @version_features ||= case nt_version
+        when 6.2 # Windows 8 & Server 2012
+          ['4.0', '4.5']
+        when 6.3 # Windows 8.1 & Server 2012R2
+          ['4.0', '4.5', '4.5.1']
+        when 10 # Windows 10
+          ['4.0', '4.5', '4.5.1', '4.5.2']
+        else
+          []
+      end
+    end
+
+    def version_packages
+      @version_packages ||= case nt_version
+        when 5.1, 5.2 # Windows XP & Windows Server 2003
+          ['4.0']
+        when 6.0, 6.1 # Vista, 7 & Windows Server 2008, 2008R2
+          ['4.0', '4.5', '4.5.1', '4.5.2', '4.6']
+        when 6.2 # Windows 8 & Server 2012
+          ['4.5.1', '4.5.2', '4.6']
+        when 6.3 # Windows 8.1 & Server 2012R2
+          ['4.5.2', '4.6']
+        when 10 # Windows 10
+          ['4.6']
+        else
+          []
+      end
+    end
+
+    def version_patches
+      @version_patches ||= case nt_version
+        when 5.1, 5.2
+          { '4.0' => 'KB2468871' }
+        when 6.0, 6.1, 6.2, 6.3, 10
+          { '4.6' => 'KB3083186' }
+        else
+          {}
       end
     end
   end
