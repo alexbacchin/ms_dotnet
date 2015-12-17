@@ -25,3 +25,5 @@ provides :ms_dotnet_framework
 attribute :version,         name_attribute: true, kind_of: String
 attribute :timeout,         default: 600,         kind_of: Fixnum
 attribute :include_patches, default: true,        kind_of: [TrueClass, FalseClass]
+attribute :feature_source,  default: nil,         kind_of: String
+attribute :package_sources, default: {},          kind_of: Hash

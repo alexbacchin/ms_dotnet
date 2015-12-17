@@ -34,11 +34,10 @@ action :install do
     Chef::Log.info "Unsupported .NET version: #{new_resource.version}"
   else
     # Handle features
-    feature_source = node['ms_dotnet']["v#{new_resource.major_version}"]['source']
     features.each do |feature|
       windows_feature feature do
         action        :install
-        source        feature_source unless feature_source.nil?
+        source        new_resource.feature_source unless new_resource.feature_source.nil?
       end
     end
 
@@ -65,7 +64,7 @@ def win_package(package)
     timeout         new_resource.timeout
     # Package specific info
     checksum        package[:checksum]
-    source          node['ms_dotnet']['packages'][package[:checksum]] || package[:url]
+    source          new_resource.package_sources[package[:checksum]] || package[:url]
     not_if          package[:not_if] unless package[:not_if].nil?
   end
 end
@@ -87,7 +86,6 @@ def features
   @features ||= version_helper.features new_resource.version
 end
 
-def patches 
+def patches
   @patches ||= version_helper.patches new_resource.version
 end
-
