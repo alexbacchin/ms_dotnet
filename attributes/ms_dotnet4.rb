@@ -19,7 +19,5 @@
 #
 
 if platform? 'windows'
-  nt_version = ::Windows::VersionHelper.nt_version(node)
-  default['ms_dotnet']['v4']['version']                                   = '4.0'
-
+  default['ms_dotnet']['v4']['version'] = '4.0'
 end

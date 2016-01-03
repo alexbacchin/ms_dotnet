@@ -26,7 +26,12 @@ def whyrun_supported?
 end
 
 def load_current_resource
-# TODO: check if a newer version is already installed
+  installed_version = version_helper.installed_version
+
+  if installed_version
+    @current_resource = ::Chef::Resources::MsDotNetFramework.new new_resource.name, run_context
+    @current_resource.version installed_version
+  end
 end
 
 action :install do
@@ -75,7 +80,7 @@ end
 
 def version_helper
   # Use same design as URI for the factory method
-  @version_helper ||= ::MSDotNet::VersionHelper.factory node, new_resource.version
+  @version_helper ||= ::MSDotNet.version_helper node, major_version
 end
 
 def package

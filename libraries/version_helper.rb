@@ -18,72 +18,48 @@
 # limitations under the License.
 #
 module MSDotNet
-  class VersionHelper
 
-    attr_reader :arch, :nt_version, :is_core, :is_server, :machine_type
-
-    def initialize(node)
-      @arch = node['kernel']['machine'] == 'x86_64' ? 'x64' : 'x86' 
-      @nt_version = ::Windows::VersionHelper.nt_version(node)
-      @is_core ::Windows::VersionHelper.core_version?(node)
-      @is_server ::Windows::VersionHelper.server_version?(node)
-
-      if core?
-        @machine_type = :core
-      elsif server?
-        @machine_type = :server
+  def self.version_helper(node, major_version)
+    case major_version
+      when 2
+        V2Helper.new node
+      when 3
+        V3Helper.new node
+      when 4
+        V4Helper.new node
       else
-        @machine_type = :workstation
-      end
+        fail ArgumentError
     end
+  end
 
-    def self.factory(node, major_version)
-      case major_version
-        when 2
-          V2Helper.new node
-        when 4
-          V4Helper.new node
-        else
-          raise ArgumentError
-      end
-    end
-
+  class VersionHelper < PackageHelper
     def features(version)
       version_features.include?(version) ? all_features : []
     end
 
     def package(version)
-       all_packages[version] if version_package.include? version
+      packages[version] if version_package.include? version
     end
 
     def patches(version)
-      version_patches.include?(version) ? all_patches[version] : []
+      version_patches.include?(version) ? packages[version] : []
     end
 
     protected
-
-    def all_features
-      raise NotImplementedError
+    def version_features
+      fail NotImplementedError
     end
 
-    def all_packages
-      raise NotImplementedError
+    def version_patches
+      fail NotImplementedError
     end
 
-    def all_patches
-      raise NotImplementedError
+    def setup_mode
+      fail NotImplementedError
     end
 
-    def core?
-      is_core
-    end
-
-    def server?
-      is_server
-    end
-
-    def x64?
-      arch == 'x64' 
+    def supported_version
+      fail NotImplementedError
     end
   end
 end

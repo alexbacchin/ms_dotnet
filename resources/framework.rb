@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: ms_dotnet
-# Provider:: framework
+# Resource:: framework
 # Author:: Baptiste Courtois (<b.courtois@criteo.com>)
 #
 # Copyright (C) 2015 Criteo

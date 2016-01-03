@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: ms_dotnet
-# Library:: v2_helper
+# Library:: v3_helper
 # Author:: Baptiste Courtois (<b.courtois@criteo.com>)
 #
 # Copyright (C) 2015 Criteo
@@ -20,49 +20,35 @@
 module MSDotNet
   class V3Helper < VersionHelper
 
-# Catalog of packages, patches and feature
-
-    def all_packages
-      @all_packages ||= {
-        '3.5.1' => {
-          name:       'Microsoft .NET Framework 3.5 Service Pack 1',
-          url:        'https://download.microsoft.com/download/2/0/E/20E90413-712F-438C-988E-FDAA79A8AC3D/dotnetfx35.exe',
-          checksum:   '0582515bde321e072f8673e829e175ed2e7a53e803127c50253af76528e66bc1',
-        }
-      }
-    end
-
-    def all_patches
-      # TODO handle theses patches
-      # http://www.microsoft.com/en-us/download/details.aspx?id=10006
-      # http://www.microsoft.com/en-us/download/details.aspx?id=1055
-      # http://www.microsoft.com/en-us/download/details.aspx?id=16211
-      # http://www.microsoft.com/en-us/download/details.aspx?id=16921
-      @all_patches ||= {} 
-    end
-
-    def all_features
-      @all_features ||= if server? && nt_version >= 6.2
-          ['NetFx3ServerFeatures']
-        elsif nt_version >= 6.0
-          ['NetFx3']
-        else
-          []
-        end
-    end
-
-# Mapping with .NET 3 versions
-
+    # Catalog of packages, patches and feature
     def version_features
-      @version_features ||= nt_version >= 6.0 ? ['3.5'] : []
+      @feature_names ||= if server? && nt_version >= 6.2
+        ['NetFx3ServerFeatures']
+      elsif nt_version >= 6.0
+        ['NetFx3']
+      else
+        []
+      end
     end
 
-    def version_packages
-      @version_packages ||= []
+    def setup_mode
+      @setup_mode ||= case nt_version
+        # Windows XP, Server 2003
+        when 5.2, 5.3
+          { package: ['3.0', '3.5', '3.5 SP1'] }
+        when 6.0
+          { feature: ['3.0'], package: ['3.5', '3.5 SP1'] }
+        when 6.1, 6.2, 6.3, 10
+          { feature: ['3.0', '3.5', '3.5 SP1'] }
+      end
     end
 
-    def version_patches
-      @version_patches ||= {}
+    def supported_versions
+      @supported_versions ||= ['3.0', '3.5', '3.5 SP1']
+    end
+
+    def patch_names
+      @patch_names ||= {}
     end
   end
 end
