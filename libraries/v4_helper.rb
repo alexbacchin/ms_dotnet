@@ -39,45 +39,43 @@ module MSDotNet
     def feature_names
       @feature_names ||= case nt_version
         when 6.2, 6.3, 10
-          case machine_type
-            # TODO: check 2012R2 Core feature name
-            when :core
-              ['netFx4-Server-Core']
-            when :server
-              ['NetFx4ServerFeatures']
-            else
-              ['NetFx4']
-          end
-      end
-    end
-
-    def setup_mode
-      @setup_mode ||= case nt_version
-        # Windows XP & Windows Server 2003
-        when 5.1, 5.2
-          { package: ['4.0'] }
-        # Windows Vista & Server 2008
-        when 6.0
-          { package: ['4.0', '4.5', '4.5.1', '4.5.2', '4.6'] }
-        # Windows 7 & Server 2008R2
-        when 6.1
-          { package: ['4.0', '4.5', '4.5.1', '4.5.2', '4.6', '4.6.1'] }
-        # Windows 8 & Server 2012
-        when 6.2
-          { feature: ['4.0', '4.5'], package: ['4.5.1', '4.5.2', '4.6', '4.6.1'] }
-        # Windows 8.1 & Server 2012R2
-        when 6.3
-          { feature: ['4.0', '4.5', '4.5.1'], package: ['4.5.2', '4.6', '4.6.1'] }
-        # Windows 10
-        when 10
-          { feature: ['4.0', '4.5', '4.5.1', '4.5.2'], package: ['4.6', '4.6.1'] }
+          # TODO: check 2012R2 Core feature name
+          core? ? ['netFx4-Server-Core'] : ['NetFx4']
         else
-          {}
+          []
       end
     end
 
-    def supported_versions
-      @supported_versions ||= ['4.0', '4.5', '4.5.1', '4.5.2', '4.6', '4.6.1']
+    def feature_setup
+      @feature_setup ||= case nt_version
+        # Windows 8 & Server 2012
+        when 6.2 then ['4.0', '4.5']
+        # Windows 8.1 & Server 2012R2
+        when 6.3 then ['4.0', '4.5', '4.5.1']
+        # Windows 10
+        when 10 then ['4.0', '4.5', '4.5.1', '4.5.2']
+        # Other versions
+        else []
+      end
+    end
+
+    def package_setup
+      @package_setup ||= case nt_version
+        # Windows XP & Windows Server 2003
+        when 5.1, 5.2 then ['4.0']
+        # Windows Vista & Server 2008
+        when 6.0 then ['4.0', '4.5', '4.5.1', '4.5.2', '4.6']
+        # Windows 7 & Server 2008R2
+        when 6.1 then ['4.0', '4.5', '4.5.1', '4.5.2', '4.6', '4.6.1']
+        # Windows 8 & Server 2012
+        when 6.2 then ['4.5.1', '4.5.2', '4.6', '4.6.1']
+        # Windows 8.1 & Server 2012R2
+        when 6.3 then ['4.5.2', '4.6', '4.6.1']
+        # Windows 10
+        when 10 then ['4.6.1']
+        # Other versions
+        else []
+      end
     end
 
     def patch_names
@@ -89,6 +87,10 @@ module MSDotNet
         else
           {}
       end
+    end
+
+    def supported_versions
+      @supported_versions ||= ['4.0', '4.5', '4.5.1', '4.5.2', '4.6', '4.6.1']
     end
   end
 end

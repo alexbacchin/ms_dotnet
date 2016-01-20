@@ -18,39 +18,55 @@
 # limitations under the License.
 #
 module MSDotNet
+  # Provides information about .NET 2 setup
   class V2Helper < VersionHelper
+    REGISTRY_KEY = 'HKLM/Software/Microsoft/Net Framework Setup/NDP/v2.0.50727/'
 
-    def setup_mode
-      @setup_mode ||= case nt_version
-        # Windows XP & Windows Server 2003
-        when 5.1, 5.2
-          { package: ['2.0 SP2'] }
-        # Windows Vista & Server 2008
-        when 6.0, 6.1
-          { feature: ['2.0 SP2'] }
-        else
-          {}
-      end
+    def installed_version
+      return unless registry_key_exists? REGISTRY_KEY
+
+      values = Hash[registry_get_values(REGISTRY_KEY).map { |e| [e[:name], e[:data]] }]
+      case values[:SP].to_i
+        when 0 then '2.0'
+        when 2 then '2.0.SP1'
+        when 2 then '2.0.SP2'
+      end if values[:Install].to_i == 1
     end
 
-    def supported_versions
-      @supported_versions ||= ['2.0 SP2']
-    end
-
-    # Mapping with .NET 2 versions
-
-    def version_features
-      @all_features ||= if 6.0 == nt_version && machine_type == :server
+    def feature_names
+      @feature_names ||= if 6.0 == nt_version && server?
         ['NET-Framework-Core']
-      elsif nt_version.between?(6.0, 6.1) && machine_type == :core
+      elsif nt_version.between?(6.0, 6.1) && core?
         x64? ? ['NetFx2-ServerCore', 'NetFx2-ServerCore-WOW64'] : ['NetFx2-ServerCore']
       else
         []
       end
     end
 
-    def version_patches
-      @version_patches ||= {}
+    def feature_setup
+      @feature_setup ||= case nt_version
+        # Windows Vista & Server 2008
+        when 6.0, 6.1 then ['2.0.SP2']
+        # Other versions
+        else []
+      end
+    end
+
+    def package_setup
+      @package_setup ||= case nt_version
+        # Windows XP & Windows Server 2003
+        when 5.1, 5.2 then ['2.0.SP2']
+        # Other versions
+        else []
+      end
+    end
+
+    def patch_names
+      @patch_names ||= {}
+    end
+
+    def supported_versions
+      @supported_versions ||= ['2.0.SP2']
     end
   end
 end

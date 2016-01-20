@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 module MSDotNet
-
+  # Factory method to get VersionHelper for a given major .NET version
   def self.version_helper(node, major_version)
     case major_version
       when 2
@@ -28,36 +28,67 @@ module MSDotNet
       when 4
         V4Helper.new node
       else
-        fail ArgumentError
+        fail ArgumentError, "Unsupported version '#{major_version}'"
     end
   end
 
+  # Base "abstract" class for .NET version helper
+  # Provides method to easily determine how to setup a .NET version
   class VersionHelper < PackageHelper
+    def initialize(node)
+      fail 'MSDotNet::VersionHelper is an "abstract" class and must not be instanciated directly.' if self.class == MSDotNet::VersionHelper
+      super
+    end
+
+    # Get windows features required by the given .NET version
     def features(version)
-      version_features.include?(version) ? all_features : []
+      feature_setup.include?(version) ? feature_names : []
     end
 
+    # Get windows package required by the given .NET version
     def package(version)
-      packages[version] if version_package.include? version
+      packages[version] if package_setup.include? version
     end
 
+    # Get windows patches required by the given .NET version
     def patches(version)
-      version_patches.include?(version) ? packages[version] : []
+      patch_names[version] || []
     end
 
     protected
-    def version_features
+
+    # Get installed .NET version on the current node
+    # Returns a String or nil
+    def installed_version
       fail NotImplementedError
     end
 
-    def version_patches
+    # Get windows feature's names for the major .NET version on the current node OS
+    # Returns an Array<string>
+    def feature_names
       fail NotImplementedError
     end
 
-    def setup_mode
+    # Get all .NET versions requiring windows feature activation on the current node OS
+    # Returns an Array<string>
+    def feature_setup
       fail NotImplementedError
     end
 
+    # Get all .NET versions requiring windows package install on the current node OS
+    # Returns an Array<string>
+    def package_setup
+      fail NotImplementedError
+    end
+
+    # Get patch package's names for each minor .NET versions on the current node OS
+    # Returns a Hash<string,string> with .NET version as key, and package name as value
+    def patch_names
+      fail NotImplementedError
+    end
+
+    # Get all .NET versions supported on the current node OS
+    # Returns an Array<string>
     def supported_version
       fail NotImplementedError
     end
