@@ -54,15 +54,7 @@ if platform? 'windows'
     default['ms_dotnet']['versions']['4.5.2']['package']['url']           = 'http://download.microsoft.com/download/E/2/1/E21644B5-2DF2-47C2-91BD-63C560427900/NDP452-KB2901907-x86-x64-AllOS-ENU.exe'
     default['ms_dotnet']['versions']['4.5.2']['package']['checksum']      = '6c2c589132e830a185c5f40f82042bee3022e721a216680bd9b3995ba86f3781'
 
-    default['ms_dotnet']['versions']['4.6']['package']['name']          = 'Microsoft .NET Framework 4.6'
-    default['ms_dotnet']['versions']['4.6']['package']['url']           = 'http://download.microsoft.com/download/C/3/A/C3A5200B-D33C-47E9-9D70-2F7C65DAAD94/NDP46-KB3045557-x86-x64-AllOS-ENU.exe'
-    default['ms_dotnet']['versions']['4.6']['package']['checksum']      = 'b21d33135e67e3486b154b11f7961d8e1cfd7a603267fb60febb4a6feab5cf87'
-
-    default['ms_dotnet']['versions']['4.6.1']['package']['name']          = 'Microsoft .NET Framework 4.6.1'
-    default['ms_dotnet']['versions']['4.6.1']['package']['url']           = 'http://download.microsoft.com/download/E/4/1/E4173890-A24A-4936-9FC9-AF930FE3FA40/NDP461-KB3102436-x86-x64-AllOS-ENU.exe'
-    default['ms_dotnet']['versions']['4.6.1']['package']['checksum']      = 'beaa901e07347d056efe04e8961d5546c7518fab9246892178505a7ba631c301'
-
-    # Starting with windows 8 and Server 2012 old version of .NET Framework 4 are builtin or included as feature
+        # Starting with windows 8 and Server 2012 old version of .NET Framework 4 are builtin or included as feature
     if nt_version >= 6.2
       feature_name = if ::Windows::VersionHelper.workstation_version?(node)
         :builtin # .NET 4 can't be disabled on windows 8 and windows 8.1
@@ -78,5 +70,14 @@ if platform? 'windows'
       hotfix_id = nt_version == 6.3 ? 'KB2934520' : 'KB2901982'
       default['ms_dotnet']['versions']['4.5.2']['package']['not_if'] = "wmic path Win32_QuickFixEngineering WHERE HotFixID='#{hotfix_id}' | FindStr #{hotfix_id}"
     end
+
+    default['ms_dotnet']['versions']['4.6']['package']['name']          = 'Microsoft .NET Framework 4.6'
+    default['ms_dotnet']['versions']['4.6']['package']['url']           = 'http://download.microsoft.com/download/C/3/A/C3A5200B-D33C-47E9-9D70-2F7C65DAAD94/NDP46-KB3045557-x86-x64-AllOS-ENU.exe'
+    default['ms_dotnet']['versions']['4.6']['package']['checksum']      = 'b21d33135e67e3486b154b11f7961d8e1cfd7a603267fb60febb4a6feab5cf87'
+
+    default['ms_dotnet']['versions']['4.6.1']['package']['name']          = 'Microsoft .NET Framework 4.6.1'
+    default['ms_dotnet']['versions']['4.6.1']['package']['url']           = 'http://download.microsoft.com/download/E/4/1/E4173890-A24A-4936-9FC9-AF930FE3FA40/NDP461-KB3102436-x86-x64-AllOS-ENU.exe'
+    default['ms_dotnet']['versions']['4.6.1']['package']['checksum']      = 'beaa901e07347d056efe04e8961d5546c7518fab9246892178505a7ba631c301'
+
   end
 end
