@@ -78,6 +78,6 @@ if platform? 'windows'
     default['ms_dotnet']['versions']['4.6.1']['package']['name']          = 'Microsoft .NET Framework 4.6.1'
     default['ms_dotnet']['versions']['4.6.1']['package']['url']           = 'http://download.microsoft.com/download/E/4/1/E4173890-A24A-4936-9FC9-AF930FE3FA40/NDP461-KB3102436-x86-x64-AllOS-ENU.exe'
     default['ms_dotnet']['versions']['4.6.1']['package']['checksum']      = 'beaa901e07347d056efe04e8961d5546c7518fab9246892178505a7ba631c301'
-
+    default['ms_dotnet']['versions']['4.6.1']['package']['not_if']        = "wmic path Win32_QuickFixEngineering WHERE HotFixID='KB3102467' | FindStr KB3102467"
   end
 end
